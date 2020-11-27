@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using EasyCaching.Core.Configurations;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -30,10 +29,7 @@ namespace SSBackendApp
 
             services.AddSignalR();
 
-            services.AddDistributedRedisCache(config =>
-            {
-                config.Configuration = "91.243.84.18";
-            });
+            services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(Environment.GetEnvironmentVariable("REDIS_ENDPOINT")));
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

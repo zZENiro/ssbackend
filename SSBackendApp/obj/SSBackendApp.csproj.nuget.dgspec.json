@@ -38,14 +38,6 @@
       "frameworks": {
         "netcoreapp3.1": {
           "dependencies": {
-            "EasyCaching.InMemory": {
-              "target": "Package",
-              "version": "[1.1.0, )"
-            },
-            "EasyCaching.Redis": {
-              "target": "Package",
-              "version": "[1.1.0, )"
-            },
             "Microsoft.AspNetCore.SignalR": {
               "target": "Package",
               "version": "[1.1.0, )"
@@ -54,13 +46,13 @@
               "target": "Package",
               "version": "[1.1.0, )"
             },
-            "Microsoft.Extensions.Caching.Redis": {
-              "target": "Package",
-              "version": "[2.2.0, )"
-            },
             "Microsoft.VisualStudio.Azure.Containers.Tools.Targets": {
               "target": "Package",
               "version": "[1.10.9, )"
+            },
+            "StackExchange.Redis": {
+              "target": "Package",
+              "version": "[2.2.4, )"
             }
           },
           "imports": [
