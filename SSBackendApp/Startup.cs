@@ -26,8 +26,6 @@ namespace SSBackendApp
         public Startup(IConfiguration configuration)
         {
             _configuration = configuration;
-
-            CultureInfo.CurrentCulture.
         }
 
         public void ConfigureServices(IServiceCollection services)

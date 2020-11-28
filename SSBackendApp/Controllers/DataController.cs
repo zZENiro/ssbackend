@@ -20,6 +20,7 @@ namespace SSBackendApp.Controllers
         private readonly StringBuilder _energyKey;
 
         private DateTime _currentDate;
+        NumberFormatInfo numberFormatInfo;
 
         public DataController(
             IConnectionMultiplexer multiplexer,
@@ -27,7 +28,10 @@ namespace SSBackendApp.Controllers
         {
             _features = (List<FeaturesCache>)features;
             _weatherKey = new StringBuilder();
-            _energyKey = new StringBuilder();   
+            _energyKey = new StringBuilder();
+
+            numberFormatInfo = new NumberFormatInfo();
+            numberFormatInfo.NumberDecimalSeparator = ".";
         }
 
         [HttpGet]
@@ -49,13 +53,13 @@ namespace SSBackendApp.Controllers
             {
                 _currentDate = _startDate.Add(TimeSpan.FromDays(i));
 
-                prediction.Add((int.Parse(_features[i].NightDuration, ) * PredictionModelConfiguration.NightDurationWeight) +
-                               (double.Parse(_features[i].Weather) * PredictionModelConfiguration.WeatherWeight) +
-                               (int.Parse(_features[i].NewYear) * PredictionModelConfiguration.NewYearWeight) +
-                               (int.Parse(_features[i].Holliday) * PredictionModelConfiguration.HolidayWeight) +
-                               (int.Parse(_features[i].Sunday) * PredictionModelConfiguration.SundayWeight) +
-                               (int.Parse(_features[i].Saturday) * PredictionModelConfiguration.SaturdayWeight) +
-                               (int.Parse(_features[i].CovidCases) * PredictionModelConfiguration.CovidCasesWeight) +
+                prediction.Add((int.Parse(_features[i].NightDuration, numberFormatInfo) * PredictionModelConfiguration.NightDurationWeight) +
+                               (double.Parse(_features[i].Weather, numberFormatInfo) * PredictionModelConfiguration.WeatherWeight) +
+                               (double.Parse(_features[i].NewYear, numberFormatInfo) * PredictionModelConfiguration.NewYearWeight) +
+                               (double.Parse(_features[i].Holliday, numberFormatInfo) * PredictionModelConfiguration.HolidayWeight) +
+                               (int.Parse(_features[i].Sunday, numberFormatInfo) * PredictionModelConfiguration.SundayWeight) +
+                               (int.Parse(_features[i].Saturday, numberFormatInfo) * PredictionModelConfiguration.SaturdayWeight) +
+                               (double.Parse(_features[i].CovidCases, numberFormatInfo) * PredictionModelConfiguration.CovidCasesWeight) +
                                PredictionModelConfiguration.Bies);
 
                 timeFrames.Add($"{_currentDate.Year}-{_currentDate.Month.ToString("00")}-{_currentDate.Day.ToString("00")}");
