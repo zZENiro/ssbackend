@@ -34,13 +34,11 @@ namespace SSBackendApp
 
             services.AddSignalR();
 
-            services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(Environment.GetEnvironmentVariable("REDIS_ENDPOINT")));
-
             services.AddSingleton<IEnumerable<FeaturesCache>>(impl =>
             {
                 List<FeaturesCache> features = new List<FeaturesCache>();
 
-                using (var streamReader = System.IO.File.OpenText("Dataset.csv"))
+                using (var streamReader = System.IO.File.OpenText(Environment.GetEnvironmentVariable("DATA_CSV")))
                 {
                     var csvReader = new CsvReader(streamReader, CultureInfo.CurrentCulture);
 
