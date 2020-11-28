@@ -1,7 +1,6 @@
 ﻿using CsvHelper;
 using Microsoft.AspNetCore.Mvc;
 using SSBackendApp.Cache;
-using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -23,7 +22,6 @@ namespace SSBackendApp.Controllers
         NumberFormatInfo numberFormatInfo;
 
         public DataController(
-            IConnectionMultiplexer multiplexer,
             IEnumerable<FeaturesCache> features)
         {
             _features = (List<FeaturesCache>)features;
@@ -48,8 +46,9 @@ namespace SSBackendApp.Controllers
 
             var prediction = new List<double>();
             var timeFrames = new List<string>();
+            var actual = new List<string>();
 
-            for (int i = 0; i < timedelta.Days; ++i)
+            for (int i = 0; i < timedelta.Days; i += _step)
             {
                 _currentDate = _startDate.Add(TimeSpan.FromDays(i));
 
@@ -63,6 +62,8 @@ namespace SSBackendApp.Controllers
                                PredictionModelConfiguration.Bies);
 
                 timeFrames.Add($"{_currentDate.Year}-{_currentDate.Month.ToString("00")}-{_currentDate.Day.ToString("00")}");
+
+
             }
 
             return new JsonResult(new { x = timeFrames, y = prediction, actual_y = _features.Select(el => el.Target) });

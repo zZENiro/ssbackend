@@ -15,7 +15,6 @@ using Microsoft.Extensions.Hosting;
 using SSBackendApp.Cache;
 using SSBackendApp.Controllers;
 using SSBackendApp.Hubs;
-using StackExchange.Redis;
 
 namespace SSBackendApp
 {
