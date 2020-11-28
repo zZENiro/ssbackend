@@ -17,9 +17,10 @@ namespace SSBackendApp.Controllers
         private readonly List<FeaturesCache> _features;
         private readonly StringBuilder _weatherKey;
         private readonly StringBuilder _energyKey;
+        private readonly DateTime _startTime = DateTime.Parse("2010-06-22");
 
         private DateTime _currentDate;
-        NumberFormatInfo numberFormatInfo;
+        private NumberFormatInfo numberFormatInfo;
 
         public DataController(
             IEnumerable<FeaturesCache> features)
@@ -40,18 +41,23 @@ namespace SSBackendApp.Controllers
             var _endDate = DateTime.Parse(endDate);
             var _step = step == "mounth" ? 30 : 1;
 
-            var timedelta = _endDate - _startDate;
+            var timedelta = (_endDate - _startDate).Days;
 
-            CacheFlags.MaxQueriedDaysCount = timedelta.Days > CacheFlags.MaxQueriedDaysCount ? timedelta.Days : CacheFlags.MaxQueriedDaysCount;
+            var startIndex = (_startDate - _startTime).Days - 1; 
 
             var prediction = new List<double>();
             var timeFrames = new List<string>();
             var actual = new List<string>();
 
-            for (int i = 0; i < timedelta.Days; i += _step)
+            for (int i = 0; i < timedelta; i += _step)
             {
                 _currentDate = _startDate.Add(TimeSpan.FromDays(i));
+                timeFrames.Add($"{_currentDate.Year}-{_currentDate.Month.ToString("00")}-{_currentDate.Day.ToString("00")}");
 
+            }
+
+            for (int i = startIndex; i < startIndex + timedelta; i += _step)
+            {
                 prediction.Add((int.Parse(_features[i].NightDuration, numberFormatInfo) * PredictionModelConfiguration.NightDurationWeight) +
                                (double.Parse(_features[i].Weather, numberFormatInfo) * PredictionModelConfiguration.WeatherWeight) +
                                (double.Parse(_features[i].NewYear, numberFormatInfo) * PredictionModelConfiguration.NewYearWeight) +
@@ -61,12 +67,10 @@ namespace SSBackendApp.Controllers
                                (double.Parse(_features[i].CovidCases, numberFormatInfo) * PredictionModelConfiguration.CovidCasesWeight) +
                                PredictionModelConfiguration.Bies);
 
-                timeFrames.Add($"{_currentDate.Year}-{_currentDate.Month.ToString("00")}-{_currentDate.Day.ToString("00")}");
-
-
+                actual.Add(_features[i].Target);
             }
 
-            return new JsonResult(new { x = timeFrames, y = prediction, actual_y = _features.Select(el => el.Target) });
+            return new JsonResult(new { x = timeFrames, y = prediction, actual_y = actual });
         }
 
         [HttpGet]

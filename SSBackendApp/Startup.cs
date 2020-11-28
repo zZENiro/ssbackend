@@ -33,11 +33,21 @@ namespace SSBackendApp
 
             services.AddSignalR();
 
+            services.AddCors(config =>
+            {
+                config.AddDefaultPolicy(policy =>
+                {
+                    policy.WithOrigins("http://nrg.remonstro.ru", "https://nrg.remonstro.ru");
+                    policy.AllowAnyMethod();
+                    policy.AllowAnyHeader();
+                });
+            });
+
             services.AddSingleton<IEnumerable<FeaturesCache>>(impl =>
             {
                 List<FeaturesCache> features = new List<FeaturesCache>();
 
-                using (var streamReader = System.IO.File.OpenText(Environment.GetEnvironmentVariable("DATA_CSV")))
+                using (var streamReader = System.IO.File.OpenText(Environment.GetEnvironmentVariable("DATA_CSV"))) // DATA_CSV
                 {
                     var csvReader = new CsvReader(streamReader, CultureInfo.CurrentCulture);
 
@@ -61,7 +71,15 @@ namespace SSBackendApp
                 app.UseDeveloperExceptionPage();
             }
 
+
             app.UseRouting();
+
+            app.UseCors(config =>
+            {
+                config.AllowAnyOrigin();
+                config.AllowAnyMethod();
+                config.AllowAnyHeader();
+            });
 
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {

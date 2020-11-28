@@ -18,6 +18,7 @@
       "commandName": "Project",
       "environmentVariables": {
         "REDIS_ENDPOINT": "91.243.84.18:6379",
+        "DATA_CSV" : "Value",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "applicationUrl": "http://localhost:5000"
