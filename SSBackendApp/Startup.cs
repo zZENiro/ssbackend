@@ -33,15 +33,7 @@ namespace SSBackendApp
 
             services.AddSignalR();
 
-            services.AddCors(config =>
-            {
-                config.AddDefaultPolicy(policy =>
-                {
-                    policy.WithOrigins("http://nrg.remonstro.ru");
-                    policy.AllowAnyMethod();
-                    policy.AllowAnyHeader();
-                });
-            });
+            services.AddCors();
 
             services.AddSingleton<IEnumerable<FeaturesCache>>(impl =>
             {
@@ -74,10 +66,7 @@ namespace SSBackendApp
 
             app.UseRouting();
 
-            app.UseCors(config =>
-            {
-                config.WithOrigins("http://nrg.remonstro.ru");
-            });
+            app.UseCors();
 
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
