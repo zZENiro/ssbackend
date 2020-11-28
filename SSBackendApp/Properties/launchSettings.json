@@ -17,7 +17,7 @@
     "SSBackendApp": {
       "commandName": "Project",
       "environmentVariables": {
-        "REDIS_ENDPOINT": "Value",
+        "REDIS_ENDPOINT": "91.243.84.18:6379",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "applicationUrl": "http://localhost:5000"

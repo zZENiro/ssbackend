@@ -19,8 +19,6 @@ C:\Users\zZEN\source\repos\SSBackend\SSBackendApp\bin\Debug\netcoreapp3.1\SSBack
 C:\Users\zZEN\source\repos\SSBackend\SSBackendApp\obj\Debug\netcoreapp3.1\SSBackendApp.dll
 C:\Users\zZEN\source\repos\SSBackend\SSBackendApp\obj\Debug\netcoreapp3.1\SSBackendApp.pdb
 C:\Users\zZEN\source\repos\SSBackend\SSBackendApp\obj\Debug\netcoreapp3.1\SSBackendApp.genruntimeconfig.cache
-C:\Users\zZEN\source\repos\SSBackend\SSBackendApp\obj\Debug\netcoreapp3.1\SSBackendApp.csproj.CoreCompileInputs.cache
-C:\Users\zZEN\source\repos\SSBackend\SSBackendApp\obj\Debug\netcoreapp3.1\SSBackendApp.MvcApplicationPartsAssemblyInfo.cache
 C:\Users\zZEN\source\repos\SSBackend\SSBackendApp\bin\Debug\netcoreapp3.1\Microsoft.Win32.Registry.dll
 C:\Users\zZEN\source\repos\SSBackend\SSBackendApp\bin\Debug\netcoreapp3.1\Microsoft.Win32.SystemEvents.dll
 C:\Users\zZEN\source\repos\SSBackend\SSBackendApp\bin\Debug\netcoreapp3.1\Pipelines.Sockets.Unofficial.dll
@@ -44,3 +42,6 @@ C:\Users\zZEN\source\repos\SSBackend\SSBackendApp\bin\Debug\netcoreapp3.1\runtim
 C:\Users\zZEN\source\repos\SSBackend\SSBackendApp\bin\Debug\netcoreapp3.1\runtimes\unix\lib\netcoreapp2.1\System.Security.Principal.Windows.dll
 C:\Users\zZEN\source\repos\SSBackend\SSBackendApp\bin\Debug\netcoreapp3.1\runtimes\win\lib\netcoreapp2.1\System.Security.Principal.Windows.dll
 C:\Users\zZEN\source\repos\SSBackend\SSBackendApp\bin\Debug\netcoreapp3.1\runtimes\win\lib\netcoreapp3.0\System.Windows.Extensions.dll
+C:\Users\zZEN\source\repos\SSBackend\SSBackendApp\bin\Debug\netcoreapp3.1\CsvHelper.dll
+C:\Users\zZEN\source\repos\SSBackend\SSBackendApp\obj\Debug\netcoreapp3.1\SSBackendApp.csproj.CoreCompileInputs.cache
+C:\Users\zZEN\source\repos\SSBackend\SSBackendApp\obj\Debug\netcoreapp3.1\SSBackendApp.MvcApplicationPartsAssemblyInfo.cache
