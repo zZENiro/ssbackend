@@ -37,7 +37,7 @@ namespace SSBackendApp
             {
                 config.AddDefaultPolicy(policy =>
                 {
-                    policy.WithOrigins("http://nrg.remonstro.ru", "https://nrg.remonstro.ru");
+                    policy.WithOrigins("http://nrg.remonstro.ru");
                     policy.AllowAnyMethod();
                     policy.AllowAnyHeader();
                 });
@@ -76,9 +76,7 @@ namespace SSBackendApp
 
             app.UseCors(config =>
             {
-                config.AllowAnyOrigin();
-                config.AllowAnyMethod();
-                config.AllowAnyHeader();
+                config.WithOrigins("http://nrg.remonstro.ru");
             });
 
             app.UseForwardedHeaders(new ForwardedHeadersOptions

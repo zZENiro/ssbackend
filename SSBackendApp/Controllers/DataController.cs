@@ -33,6 +33,13 @@ namespace SSBackendApp.Controllers
             numberFormatInfo.NumberDecimalSeparator = ".";
         }
 
+        //[HttpGet]
+        //[Route("[action]")]
+        //public async Task<IActionResult> GetWeather([FromQuery] string startData, string endDate, string step)
+        //{
+            
+        //}
+
         [HttpGet]
         [Route("[action]")]
         public async Task<IActionResult> GetPrediction([FromQuery] string startDate, string endDate, string terr, string step)
@@ -40,6 +47,8 @@ namespace SSBackendApp.Controllers
             var _startDate = DateTime.Parse(startDate);
             var _endDate = DateTime.Parse(endDate);
             var _step = step == "mounth" ? 30 : 1;
+
+            //if (_endDate > DateTime.Now && (_endDate - DateTime.Now) > 10)
 
             var timedelta = (_endDate - _startDate).Days;
 

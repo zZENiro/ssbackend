@@ -2,7 +2,7 @@
 
 services:
   webapp:
-    image: zen1488/backendapp
+    image: zen1488/ssb
     environment:
       DATA_CSV: ./Dataset.csv
 
