@@ -10,7 +10,7 @@ RUN dotnet build "SSBackendApp.csproj" -c Release -o /app
 
 FROM build as publish
 RUN dotnet publish "SSBackendApp.csproj" -c Release -o /app
-COPY ["Dataset.csv", "/app"]
+COPY ["DatasetLong.csv", "/app"]
 
 FROM base AS final
 WORKDIR /app

@@ -4,7 +4,7 @@ services:
   webapp:
     image: zen1488/ssb
     environment:
-      DATA_CSV: ./Dataset.csv
+      DATA_CSV: ./DatasetLong.csv
 
   nginx:
     image: nginx

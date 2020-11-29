@@ -105,6 +105,37 @@ namespace SSBackendApp.Controllers
             numberFormatInfo.NumberDecimalSeparator = ".";
         }
 
+        //[HttpGet]
+        //[Route("[action]")]
+        //public async Task<IActionResult> GetSalary([FromQuery] string startDate, string endDate, string step)
+        //{
+        //    if (startDate is null || endDate is null)
+        //        return BadRequest(new { message = "Set startDate, endDate" });
+
+        //    var _startDate = DateTime.Parse(startDate);
+        //    var _endDate = DateTime.Parse(endDate);
+        //    var _step = step == "mounth" ? 30 : 1;
+
+        //    var timedelta = (_endDate - _startDate).Days;
+
+        //    var startIndex = (_startDate - _startTime).Days - 1;
+
+        //    var salaryGlobal = _features.Select(feature => double.Parse(feature.Weather, numberFormatInfo)).ToList<double>();
+        //    var salaryCollection = new List<double>();
+        //    var timeFrames = new List<string>();
+
+
+        //    var diff_after_now = (_endDate - DateTime.Now).Days; // now-->
+        //    var diff_before_now = (DateTime.Now - _startDate).Days; // <--now
+        //    var diff_sum = diff_after_now + diff_before_now;
+
+        //    for (int i = 0; i < diff_sum; i += _step)
+        //    {
+        //        _currentDate = _startDate.Add(TimeSpan.FromDays(i));
+        //        timeFrames.Add($"{_currentDate.Year}-{_currentDate.Month.ToString("00")}-{_currentDate.Day.ToString("00")}");
+        //    }
+        //}
+
         [HttpGet]
         [Route("[action]")]
         public async Task<IActionResult> GetWeather([FromQuery] string startDate, string endDate, string step)
@@ -155,9 +186,7 @@ namespace SSBackendApp.Controllers
                         continue;
                     }
 
-                    double avg_weather = (weatherGlobal[i - 365] + weatherGlobal[i - (365 * 2)] + weatherGlobal[i - (365 * 3)] + weatherGlobal[i - (365 * 4)] + weatherGlobal[i - (365 * 5)] + weatherGlobal[i - (365 * 6)] + weatherGlobal[i - (365 * 7)] + weatherGlobal[i - (365 * 8)]) / 8;
-
-                    weatherCollection.Add(avg_weather);
+                    weatherCollection.Add(weatherGlobal[i]);
                 }
             }
             // if less than 7 days
@@ -234,7 +263,7 @@ namespace SSBackendApp.Controllers
                 }
                 for (int i = startIndex + diff_before_now; i < startIndex + diff_sum; i += _step)
                 {
-                    covidGlobal.Add(1f);
+                    covidGlobal.Add(covidGlobal[i]);
                 }
                 return new JsonResult(new { x = timeFrames, y = covidCollection });
             }
@@ -283,10 +312,7 @@ namespace SSBackendApp.Controllers
                 }
                 for (int i = startIndex + diff_before_now; i < startIndex + diff_sum; i += _step)
                 {
-                    var avg_night = (nightDurationGlobal[i - 365] + nightDurationGlobal[i - (365 * 2)] + nightDurationGlobal[i - (365 * 3)] + nightDurationGlobal[i - (365 * 4)] +
-                                     nightDurationGlobal[i - (365 * 5)] + nightDurationGlobal[i - (365 * 6)] + nightDurationGlobal[i - (365 * 7)] + nightDurationGlobal[i - (365 * 8)]) / 8;
-
-                    nightDurationCollection.Add(avg_night);
+                    nightDurationCollection.Add(nightDurationGlobal[i]);
                 }
                 return new JsonResult(new { x = timeFrames, y = nightDurationGlobal });
             }
@@ -358,39 +384,33 @@ namespace SSBackendApp.Controllers
 
                 for (int i = startIndex + diff_before_now; i < startIndex + diff_sum; i += _step)
                 {
-                    var avg_night = (night[i - 365] + night[i - (365 * 2)] + night[i - (365 * 3)] + night[i - (365 * 4)] + night[i - (365 * 5)] + night[i - (365 * 6)] + night[i - (365 * 7)] + night[i - (365 * 8)]) / 8;
-                    var avg_newYear = (newYear[i - 365] + newYear[i - (365 * 2)] + newYear[i - (365 * 3)] + newYear[i - (365 * 4)] + newYear[i - (365 * 5)] + newYear[i - (365 * 6)] + newYear[i - (365 * 7)] + newYear[i - (365 * 8)]) / 8;
-                    var avg_holiday = (holiday[i - 365] + holiday[i - (365 * 2)] + holiday[i - (365 * 3)] + holiday[i - (365 * 4)] + holiday[i - (365 * 5)] + holiday[i - (365 * 6)] + holiday[i - (365 * 7)] + holiday[i - (365 * 8)]) / 8;
-                    var avg_sunday = (sunday[i - 365] + sunday[i - (365 * 2)] + sunday[i - (365 * 3)] + sunday[i - (365 * 4)] + sunday[i - (365 * 5)] + sunday[i - (365 * 6)] + sunday[i - (365 * 7)] + sunday[i - (365 * 8)]) / 8;
-                    var avg_saturday = (saturday[i - 365] + saturday[i - (365 * 2)] + saturday[i - (365 * 3)] + saturday[i - (365 * 4)] + saturday[i - (365 * 5)] + saturday[i - (365 * 6)] + saturday[i - (365 * 7)] + saturday[i - (365 * 8)]) / 8;
-                    double covid_enabled = covidEnabled ? 1f : 0f;
-
                     if (first7daysCounter < 7)
                     {
                         prediction.Add(
-                               (avg_night * PredictionModelConfiguration.NightDurationWeight) +
+                               (night[i] * PredictionModelConfiguration.NightDurationWeight) +
                                ((weatherPredict[first7daysCounter].temp.day - 273) * PredictionModelConfiguration.WeatherWeight) +
-                               (avg_newYear * PredictionModelConfiguration.NewYearWeight) +
-                               (avg_holiday * PredictionModelConfiguration.HolidayWeight) +
-                               (avg_sunday * PredictionModelConfiguration.SundayWeight) +
-                               (avg_saturday * PredictionModelConfiguration.SaturdayWeight) +
-                               (covid_enabled * PredictionModelConfiguration.CovidCasesWeight) +
+                               (newYear[i] * PredictionModelConfiguration.NewYearWeight) +
+                               (holiday[i] * PredictionModelConfiguration.HolidayWeight) +
+                               (sunday[i] * PredictionModelConfiguration.SundayWeight) +
+                               (saturday[i] * PredictionModelConfiguration.SaturdayWeight) +
+                               (covidEnabled ? 1f : 0f * PredictionModelConfiguration.CovidCasesWeight) +
                                PredictionModelConfiguration.Bies);
+
                         ++first7daysCounter;
                         actual.Add(_features[i]?.Target);
                         continue;
                     }
 
-                    double avg_weather = (weather[i - 365] + weather[i - (365 * 2)] + weather[i - (365 * 3)] + weather[i - (365 * 4)] + weather[i - (365 * 5)] + weather[i - (365 * 6)] + weather[i - (365 * 7)] + weather[i - (365 * 8)]) / 8;
-
-                    prediction.Add((avg_night * PredictionModelConfiguration.NightDurationWeight) +
-                                (avg_weather * PredictionModelConfiguration.WeatherWeight) +
-                                (avg_newYear * PredictionModelConfiguration.NewYearWeight) +
-                                (avg_holiday * PredictionModelConfiguration.HolidayWeight) +
-                                (avg_sunday * PredictionModelConfiguration.SundayWeight) +
-                                (avg_saturday * PredictionModelConfiguration.SaturdayWeight) +
-                                (covid_enabled * PredictionModelConfiguration.CovidCasesWeight) +
+                    prediction.Add(
+                                (night[i] * PredictionModelConfiguration.NightDurationWeight) +
+                                (weather[i] * PredictionModelConfiguration.WeatherWeight) +
+                                (newYear[i] * PredictionModelConfiguration.NewYearWeight) +
+                                (holiday[i] * PredictionModelConfiguration.HolidayWeight) +
+                                (sunday[i] * PredictionModelConfiguration.SundayWeight) +
+                                (saturday[i] * PredictionModelConfiguration.SaturdayWeight) +
+                                (covidEnabled ? 1f : 0f * PredictionModelConfiguration.CovidCasesWeight) +
                                 PredictionModelConfiguration.Bies);
+
                     actual.Add(_features[i]?.Target);
                 }
 
@@ -429,24 +449,18 @@ namespace SSBackendApp.Controllers
                 // after now but less than 7
                 for (int i = startIndex + diff_before_now; i <= startIndex + diff_sum; i += _step)
                 {
-                    var avg_night = (night[i - 365] + night[i - (365 * 2)] + night[i - (365 * 3)] + night[i - (365 * 4)] + night[i - (365 * 5)] + night[i - (365 * 6)] + night[i - (365 * 7)] + night[i - (365 * 8)]) / 8;
-                    var avg_newYear = (newYear[i - 365] + newYear[i - (365 * 2)] + newYear[i - (365 * 3)] + newYear[i - (365 * 4)] + newYear[i - (365 * 5)] + newYear[i - (365 * 6)] + newYear[i - (365 * 7)] + newYear[i - (365 * 8)]) / 8;
-                    var avg_holiday = (holiday[i - 365] + holiday[i - (365 * 2)] + holiday[i - (365 * 3)] + holiday[i - (365 * 4)] + holiday[i - (365 * 5)] + holiday[i - (365 * 6)] + holiday[i - (365 * 7)] + holiday[i - (365 * 8)]) / 8;
-                    var avg_sunday = (sunday[i - 365] + sunday[i - (365 * 2)] + sunday[i - (365 * 3)] + sunday[i - (365 * 4)] + sunday[i - (365 * 5)] + sunday[i - (365 * 6)] + sunday[i - (365 * 7)] + sunday[i - (365 * 8)]) / 8;
-                    var avg_saturday = (saturday[i - 365] + saturday[i - (365 * 2)] + saturday[i - (365 * 3)] + saturday[i - (365 * 4)] + saturday[i - (365 * 5)] + saturday[i - (365 * 6)] + saturday[i - (365 * 7)] + saturday[i - (365 * 8)]) / 8;
-                    double covid_enabled = covidEnabled ? 1f : 0f;
-
                     if (first7daysCounter < diff_after_now)
                     {
                         prediction.Add(
-                               (avg_night * PredictionModelConfiguration.NightDurationWeight) +
+                               (night[i] * PredictionModelConfiguration.NightDurationWeight) +
                                ((weatherPredict[first7daysCounter].temp.day - 273) * PredictionModelConfiguration.WeatherWeight) +
-                               (avg_newYear * PredictionModelConfiguration.NewYearWeight) +
-                               (avg_holiday * PredictionModelConfiguration.HolidayWeight) +
-                               (avg_sunday * PredictionModelConfiguration.SundayWeight) +
-                               (avg_saturday * PredictionModelConfiguration.SaturdayWeight) +
-                               (covid_enabled * PredictionModelConfiguration.CovidCasesWeight) +
+                               (newYear[i] * PredictionModelConfiguration.NewYearWeight) +
+                               (holiday[i] * PredictionModelConfiguration.HolidayWeight) +
+                               (sunday[i] * PredictionModelConfiguration.SundayWeight) +
+                               (saturday[i] * PredictionModelConfiguration.SaturdayWeight) +
+                               (covidEnabled ? 1f : 0f * PredictionModelConfiguration.CovidCasesWeight) +
                                PredictionModelConfiguration.Bies);
+
                         ++first7daysCounter;
                         actual.Add(_features[i]?.Target);
                     }
@@ -504,3 +518,7 @@ namespace SSBackendApp.Controllers
         public double X { get; set; }
     }
 }
+
+// http://localhost:5000/api/data/GetWeather?startDate=2020-11-01&endDate=2020-12-15
+// http://localhost:5000/api/data/GetCovid?startDate=2020-11-01&endDate=2020-12-15
+// http://localhost:5000/api/data/GetDaylight?startDate=2020-11-01&endDate=2020-12-15
