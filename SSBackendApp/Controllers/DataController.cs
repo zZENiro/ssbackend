@@ -105,37 +105,6 @@ namespace SSBackendApp.Controllers
             numberFormatInfo.NumberDecimalSeparator = ".";
         }
 
-        //[HttpGet]
-        //[Route("[action]")]
-        //public async Task<IActionResult> GetSalary([FromQuery] string startDate, string endDate, string step)
-        //{
-        //    if (startDate is null || endDate is null)
-        //        return BadRequest(new { message = "Set startDate, endDate" });
-
-        //    var _startDate = DateTime.Parse(startDate);
-        //    var _endDate = DateTime.Parse(endDate);
-        //    var _step = step == "mounth" ? 30 : 1;
-
-        //    var timedelta = (_endDate - _startDate).Days;
-
-        //    var startIndex = (_startDate - _startTime).Days - 1;
-
-        //    var salaryGlobal = _features.Select(feature => double.Parse(feature.Weather, numberFormatInfo)).ToList<double>();
-        //    var salaryCollection = new List<double>();
-        //    var timeFrames = new List<string>();
-
-
-        //    var diff_after_now = (_endDate - DateTime.Now).Days; // now-->
-        //    var diff_before_now = (DateTime.Now - _startDate).Days; // <--now
-        //    var diff_sum = diff_after_now + diff_before_now;
-
-        //    for (int i = 0; i < diff_sum; i += _step)
-        //    {
-        //        _currentDate = _startDate.Add(TimeSpan.FromDays(i));
-        //        timeFrames.Add($"{_currentDate.Year}-{_currentDate.Month.ToString("00")}-{_currentDate.Day.ToString("00")}");
-        //    }
-        //}
-
         [HttpGet]
         [Route("[action]")]
         public async Task<IActionResult> GetWeather([FromQuery] string startDate, string endDate, string step)
@@ -207,7 +176,7 @@ namespace SSBackendApp.Controllers
                 {
                     if (first7daysCounter < diff_after_now)
                     {
-                        weatherCollection.Add(weatherPredict[first7daysCounter].temp.day - 273);                               
+                        weatherCollection.Add(weatherPredict[first7daysCounter].temp.day - 273);
                         ++first7daysCounter;
                     }
                     else
@@ -243,7 +212,7 @@ namespace SSBackendApp.Controllers
             var covidGlobal = _features.Select(feature => double.Parse(feature.CovidCases, numberFormatInfo)).ToList<double>();
             var covidCollection = new List<double>();
             var timeFrames = new List<string>();
-            
+
 
             var diff_after_now = (_endDate - DateTime.Now).Days; // now-->
             var diff_before_now = (DateTime.Now - _startDate).Days; // <--now
@@ -329,166 +298,171 @@ namespace SSBackendApp.Controllers
         [Route("[action]")]
         public async Task<IActionResult> GetPrediction([FromQuery] string startDate, string endDate, string terr, string step, bool covidEnabled = true)
         {
-            if (startDate is null || endDate is null)
-                return BadRequest(new { message = "Set startDate, endDate" });
-
-            var _startDate = DateTime.Parse(startDate);
-            var _endDate = DateTime.Parse(endDate);
-            var _step = step == "mounth" ? 30 : 1;
-
-            var timedelta = (_endDate - _startDate).Days;
-
-            var startIndex = (_startDate - _startTime).Days;
-
-            var prediction = new List<double>();
-            var timeFrames = new List<string>();
-            var actual = new List<string>();
-
-            var diff_after_now = (_endDate - DateTime.Now).Days; // > 7
-            var diff_before_now = (DateTime.Now - _startDate).Days;
-            var diff_sum = diff_after_now + diff_before_now;
-
-            for (int i = 0; i < diff_sum; i += _step)
+            return await Task.Factory.StartNew<IActionResult>(() =>
             {
-                _currentDate = _startDate.Add(TimeSpan.FromDays(i));
-                timeFrames.Add($"{_currentDate.Year}-{_currentDate.Month.ToString("00")}-{_currentDate.Day.ToString("00")}");
-            }
+                if (startDate is null || endDate is null)
+                    return BadRequest(new { message = "Set startDate, endDate" });
 
-            // if predict more than 7 days
-            if (_endDate > DateTime.Now && (_endDate - DateTime.Now).Days > 7)
-            {
-                var weatherPredict = (await GetWeather()).list;
+                var _startDate = DateTime.Parse(startDate);
+                var _endDate = DateTime.Parse(endDate);
+                var _step = step == "mounth" ? 30 : 1;
 
-                var first7daysCounter = 0;
+                var timedelta = (_endDate - _startDate).Days;
 
-                var weather = _features.Select(f => double.Parse(f.Weather, numberFormatInfo)).ToList<double>();
-                var night = _features.Select(f => double.Parse(f.NightDuration, numberFormatInfo)).ToList<double>();
-                var newYear = _features.Select(f => double.Parse(f.NewYear, numberFormatInfo)).ToList<double>();
-                var holiday = _features.Select(f => double.Parse(f.Holliday, numberFormatInfo)).ToList<double>();
-                var sunday = _features.Select(f => double.Parse(f.Sunday, numberFormatInfo)).ToList<double>();
-                var saturday = _features.Select(f => double.Parse(f.Saturday, numberFormatInfo)).ToList<double>();
+                var startIndex = (_startDate - _startTime).Days;
 
-                for (int i = startIndex; i < startIndex + diff_before_now; i += _step)
+                var prediction = new List<double>();
+                var timeFrames = new List<string>();
+                var actual = new List<string>();
+
+                var diff_after_now = (_endDate - DateTime.Now).Days; // > 7
+                var diff_before_now = (DateTime.Now - _startDate).Days;
+                var diff_sum = diff_after_now + diff_before_now;
+
+                for (int i = 0; i < diff_sum; i += _step)
                 {
-                    prediction.Add((int.Parse(_features[i].NightDuration, numberFormatInfo) * PredictionModelConfiguration.NightDurationWeight) +
-                               (double.Parse(_features[i].Weather, numberFormatInfo) * PredictionModelConfiguration.WeatherWeight) +
-                               (double.Parse(_features[i].NewYear, numberFormatInfo) * PredictionModelConfiguration.NewYearWeight) +
-                               (double.Parse(_features[i].Holliday, numberFormatInfo) * PredictionModelConfiguration.HolidayWeight) +
-                               (int.Parse(_features[i].Sunday, numberFormatInfo) * PredictionModelConfiguration.SundayWeight) +
-                               (int.Parse(_features[i].Saturday, numberFormatInfo) * PredictionModelConfiguration.SaturdayWeight) +
-                               (double.Parse(_features[i].CovidCases, numberFormatInfo) * PredictionModelConfiguration.CovidCasesWeight) +
-                               PredictionModelConfiguration.Bies);
-
-                    actual.Add(_features[i]?.Target);
+                    _currentDate = _startDate.Add(TimeSpan.FromDays(i));
+                    timeFrames.Add($"{_currentDate.Year}-{_currentDate.Month.ToString("00")}-{_currentDate.Day.ToString("00")}");
                 }
 
-                for (int i = startIndex + diff_before_now; i < startIndex + diff_sum; i += _step)
+                // if predict more than 7 days
+                if (_endDate > DateTime.Now && (_endDate - DateTime.Now).Days > 7)
                 {
-                    if (first7daysCounter < 7)
-                    {
-                        prediction.Add(
-                               (night[i] * PredictionModelConfiguration.NightDurationWeight) +
-                               ((weatherPredict[first7daysCounter].temp.day - 273) * PredictionModelConfiguration.WeatherWeight) +
-                               (newYear[i] * PredictionModelConfiguration.NewYearWeight) +
-                               (holiday[i] * PredictionModelConfiguration.HolidayWeight) +
-                               (sunday[i] * PredictionModelConfiguration.SundayWeight) +
-                               (saturday[i] * PredictionModelConfiguration.SaturdayWeight) +
-                               (covidEnabled ? 1f : 0f * PredictionModelConfiguration.CovidCasesWeight) +
-                               PredictionModelConfiguration.Bies);
+                    var weatherPredict = (GetWeather().Result).list;
 
-                        ++first7daysCounter;
+                    var first7daysCounter = 0;
+
+                    var weather = _features.Select(f => double.Parse(f.Weather, numberFormatInfo)).ToList<double>();
+                    var night = _features.Select(f => double.Parse(f.NightDuration, numberFormatInfo)).ToList<double>();
+                    var newYear = _features.Select(f => double.Parse(f.NewYear, numberFormatInfo)).ToList<double>();
+                    var holiday = _features.Select(f => double.Parse(f.Holliday, numberFormatInfo)).ToList<double>();
+                    var sunday = _features.Select(f => double.Parse(f.Sunday, numberFormatInfo)).ToList<double>();
+                    var saturday = _features.Select(f => double.Parse(f.Saturday, numberFormatInfo)).ToList<double>();
+
+                    for (int i = startIndex; i < startIndex + diff_before_now; i += _step)
+                    {
+                        prediction.Add((int.Parse(_features[i].NightDuration, numberFormatInfo) * PredictionModelConfiguration.NightDurationWeight) +
+                                   (double.Parse(_features[i].Weather, numberFormatInfo) * PredictionModelConfiguration.WeatherWeight) +
+                                   (double.Parse(_features[i].NewYear, numberFormatInfo) * PredictionModelConfiguration.NewYearWeight) +
+                                   (double.Parse(_features[i].Holliday, numberFormatInfo) * PredictionModelConfiguration.HolidayWeight) +
+                                   (int.Parse(_features[i].Sunday, numberFormatInfo) * PredictionModelConfiguration.SundayWeight) +
+                                   (int.Parse(_features[i].Saturday, numberFormatInfo) * PredictionModelConfiguration.SaturdayWeight) +
+                                   (double.Parse(_features[i].CovidCases, numberFormatInfo) * PredictionModelConfiguration.CovidCasesWeight) +
+                                   PredictionModelConfiguration.Bies);
+
                         actual.Add(_features[i]?.Target);
-                        continue;
                     }
 
-                    prediction.Add(
-                                (night[i] * PredictionModelConfiguration.NightDurationWeight) +
-                                (weather[i] * PredictionModelConfiguration.WeatherWeight) +
-                                (newYear[i] * PredictionModelConfiguration.NewYearWeight) +
-                                (holiday[i] * PredictionModelConfiguration.HolidayWeight) +
-                                (sunday[i] * PredictionModelConfiguration.SundayWeight) +
-                                (saturday[i] * PredictionModelConfiguration.SaturdayWeight) +
-                                (covidEnabled ? 1f : 0f * PredictionModelConfiguration.CovidCasesWeight) +
-                                PredictionModelConfiguration.Bies);
+                    for (int i = startIndex + diff_before_now; i < startIndex + diff_sum; i += _step)
+                    {
+                        if (first7daysCounter < 7)
+                        {
+                            prediction.Add(
+                                   (night[i] * PredictionModelConfiguration.NightDurationWeight) +
+                                   ((weatherPredict[first7daysCounter].temp.day - 273) * PredictionModelConfiguration.WeatherWeight) +
+                                   (newYear[i] * PredictionModelConfiguration.NewYearWeight) +
+                                   (holiday[i] * PredictionModelConfiguration.HolidayWeight) +
+                                   (sunday[i] * PredictionModelConfiguration.SundayWeight) +
+                                   (saturday[i] * PredictionModelConfiguration.SaturdayWeight) +
+                                   (covidEnabled ? 1f : 0f * PredictionModelConfiguration.CovidCasesWeight) +
+                                   PredictionModelConfiguration.Bies);
 
-                    actual.Add(_features[i]?.Target);
+                            ++first7daysCounter;
+                            actual.Add(_features[i]?.Target);
+                            continue;
+                        }
+
+                        prediction.Add(
+                                    (night[i] * PredictionModelConfiguration.NightDurationWeight) +
+                                    (weather[i] * PredictionModelConfiguration.WeatherWeight) +
+                                    (newYear[i] * PredictionModelConfiguration.NewYearWeight) +
+                                    (holiday[i] * PredictionModelConfiguration.HolidayWeight) +
+                                    (sunday[i] * PredictionModelConfiguration.SundayWeight) +
+                                    (saturday[i] * PredictionModelConfiguration.SaturdayWeight) +
+                                    (covidEnabled ? 1f : 0f * PredictionModelConfiguration.CovidCasesWeight) +
+                                    PredictionModelConfiguration.Bies);
+
+                        actual.Add(_features[i]?.Target);
+                    }
+
+                    return new JsonResult(new { x = timeFrames, y = prediction, actual_y = actual });
+                }
+
+                // if less than 7 days
+                else if (_endDate > DateTime.Now && (_endDate - DateTime.Now).Days <= 7)
+                {
+                    var weatherPredict = (GetWeather().Result).list;
+
+                    var first7daysCounter = 0;
+
+                    var night = _features.Select(f => double.Parse(f.NightDuration, numberFormatInfo)).ToList<double>();
+                    var newYear = _features.Select(f => double.Parse(f.NewYear, numberFormatInfo)).ToList<double>();
+                    var holiday = _features.Select(f => double.Parse(f.Holliday, numberFormatInfo)).ToList<double>();
+                    var sunday = _features.Select(f => double.Parse(f.Sunday, numberFormatInfo)).ToList<double>();
+                    var saturday = _features.Select(f => double.Parse(f.Saturday, numberFormatInfo)).ToList<double>();
+
+
+                    // before now
+                    for (int i = startIndex; i < startIndex + diff_before_now; i += _step)
+                    {
+                        prediction.Add((int.Parse(_features[i].NightDuration, numberFormatInfo) * PredictionModelConfiguration.NightDurationWeight) +
+                                   (double.Parse(_features[i].Weather, numberFormatInfo) * PredictionModelConfiguration.WeatherWeight) +
+                                   (double.Parse(_features[i].NewYear, numberFormatInfo) * PredictionModelConfiguration.NewYearWeight) +
+                                   (double.Parse(_features[i].Holliday, numberFormatInfo) * PredictionModelConfiguration.HolidayWeight) +
+                                   (int.Parse(_features[i].Sunday, numberFormatInfo) * PredictionModelConfiguration.SundayWeight) +
+                                   (int.Parse(_features[i].Saturday, numberFormatInfo) * PredictionModelConfiguration.SaturdayWeight) +
+                                   (double.Parse(_features[i].CovidCases, numberFormatInfo) * PredictionModelConfiguration.CovidCasesWeight) +
+                                   PredictionModelConfiguration.Bies);
+
+                        actual.Add(_features[i]?.Target);
+                    }
+
+                    // after now but less than 7
+                    for (int i = startIndex + diff_before_now; i <= startIndex + diff_sum; i += _step)
+                    {
+                        if (first7daysCounter < diff_after_now)
+                        {
+                            prediction.Add(
+                                   (night[i] * PredictionModelConfiguration.NightDurationWeight) +
+                                   ((weatherPredict[first7daysCounter].temp.day - 273) * PredictionModelConfiguration.WeatherWeight) +
+                                   (newYear[i] * PredictionModelConfiguration.NewYearWeight) +
+                                   (holiday[i] * PredictionModelConfiguration.HolidayWeight) +
+                                   (sunday[i] * PredictionModelConfiguration.SundayWeight) +
+                                   (saturday[i] * PredictionModelConfiguration.SaturdayWeight) +
+                                   (covidEnabled ? 1f : 0f * PredictionModelConfiguration.CovidCasesWeight) +
+                                   PredictionModelConfiguration.Bies);
+
+                            ++first7daysCounter;
+                            actual.Add(_features[i]?.Target);
+                        }
+                        else
+                        {
+                            return new JsonResult(new { x = timeFrames, y = prediction, actual_y = actual });
+                        }
+                    }
+                }
+
+                for (int i = startIndex; i < startIndex + timedelta; i += _step)
+                {
+                    prediction.Add((int.Parse(_features[i].NightDuration, numberFormatInfo) * PredictionModelConfiguration.NightDurationWeight) +
+                                   (double.Parse(_features[i].Weather, numberFormatInfo) * PredictionModelConfiguration.WeatherWeight) +
+                                   (double.Parse(_features[i].NewYear, numberFormatInfo) * PredictionModelConfiguration.NewYearWeight) +
+                                   (double.Parse(_features[i].Holliday, numberFormatInfo) * PredictionModelConfiguration.HolidayWeight) +
+                                   (int.Parse(_features[i].Sunday, numberFormatInfo) * PredictionModelConfiguration.SundayWeight) +
+                                   (int.Parse(_features[i].Saturday, numberFormatInfo) * PredictionModelConfiguration.SaturdayWeight) +
+                                   (double.Parse(_features[i].CovidCases, numberFormatInfo) * PredictionModelConfiguration.CovidCasesWeight) +
+                                   PredictionModelConfiguration.Bies);
+
+                    actual.Add(_features[i].Target);
                 }
 
                 return new JsonResult(new { x = timeFrames, y = prediction, actual_y = actual });
-            }
 
-            // if less than 7 days
-            else if (_endDate > DateTime.Now && (_endDate - DateTime.Now).Days <= 7)
-            {
-                var weatherPredict = (await GetWeather()).list;
-
-                var first7daysCounter = 0;
-
-                var night = _features.Select(f => double.Parse(f.NightDuration, numberFormatInfo)).ToList<double>();
-                var newYear = _features.Select(f => double.Parse(f.NewYear, numberFormatInfo)).ToList<double>();
-                var holiday = _features.Select(f => double.Parse(f.Holliday, numberFormatInfo)).ToList<double>();
-                var sunday = _features.Select(f => double.Parse(f.Sunday, numberFormatInfo)).ToList<double>();
-                var saturday = _features.Select(f => double.Parse(f.Saturday, numberFormatInfo)).ToList<double>();
+            });
 
 
-                // before now
-                for (int i = startIndex; i < startIndex + diff_before_now; i += _step)
-                {
-                    prediction.Add((int.Parse(_features[i].NightDuration, numberFormatInfo) * PredictionModelConfiguration.NightDurationWeight) +
-                               (double.Parse(_features[i].Weather, numberFormatInfo) * PredictionModelConfiguration.WeatherWeight) +
-                               (double.Parse(_features[i].NewYear, numberFormatInfo) * PredictionModelConfiguration.NewYearWeight) +
-                               (double.Parse(_features[i].Holliday, numberFormatInfo) * PredictionModelConfiguration.HolidayWeight) +
-                               (int.Parse(_features[i].Sunday, numberFormatInfo) * PredictionModelConfiguration.SundayWeight) +
-                               (int.Parse(_features[i].Saturday, numberFormatInfo) * PredictionModelConfiguration.SaturdayWeight) +
-                               (double.Parse(_features[i].CovidCases, numberFormatInfo) * PredictionModelConfiguration.CovidCasesWeight) +
-                               PredictionModelConfiguration.Bies);
+        }
 
-                    actual.Add(_features[i]?.Target);
-                }
-
-                // after now but less than 7
-                for (int i = startIndex + diff_before_now; i <= startIndex + diff_sum; i += _step)
-                {
-                    if (first7daysCounter < diff_after_now)
-                    {
-                        prediction.Add(
-                               (night[i] * PredictionModelConfiguration.NightDurationWeight) +
-                               ((weatherPredict[first7daysCounter].temp.day - 273) * PredictionModelConfiguration.WeatherWeight) +
-                               (newYear[i] * PredictionModelConfiguration.NewYearWeight) +
-                               (holiday[i] * PredictionModelConfiguration.HolidayWeight) +
-                               (sunday[i] * PredictionModelConfiguration.SundayWeight) +
-                               (saturday[i] * PredictionModelConfiguration.SaturdayWeight) +
-                               (covidEnabled ? 1f : 0f * PredictionModelConfiguration.CovidCasesWeight) +
-                               PredictionModelConfiguration.Bies);
-
-                        ++first7daysCounter;
-                        actual.Add(_features[i]?.Target);
-                    }
-                    else
-                    {
-                        return new JsonResult(new { x = timeFrames, y = prediction, actual_y = actual });
-                    }
-                }
-            }
-
-            for (int i = startIndex; i < startIndex + timedelta; i += _step)
-            {
-                prediction.Add((int.Parse(_features[i].NightDuration, numberFormatInfo) * PredictionModelConfiguration.NightDurationWeight) +
-                               (double.Parse(_features[i].Weather, numberFormatInfo) * PredictionModelConfiguration.WeatherWeight) +
-                               (double.Parse(_features[i].NewYear, numberFormatInfo) * PredictionModelConfiguration.NewYearWeight) +
-                               (double.Parse(_features[i].Holliday, numberFormatInfo) * PredictionModelConfiguration.HolidayWeight) +
-                               (int.Parse(_features[i].Sunday, numberFormatInfo) * PredictionModelConfiguration.SundayWeight) +
-                               (int.Parse(_features[i].Saturday, numberFormatInfo) * PredictionModelConfiguration.SaturdayWeight) +
-                               (double.Parse(_features[i].CovidCases, numberFormatInfo) * PredictionModelConfiguration.CovidCasesWeight) +
-                               PredictionModelConfiguration.Bies);
-
-                actual.Add(_features[i].Target);
-            }
-
-            return new JsonResult(new { x = timeFrames, y = prediction, actual_y = actual });
-
-        }   
-        
         async Task<Rootobject> GetWeather()
         {
             var client = new HttpClient();
