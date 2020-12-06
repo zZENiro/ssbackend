@@ -12,75 +12,6 @@ using System.Threading.Tasks;
 
 namespace SSBackendApp.Controllers
 {
-
-    public class Rootobject
-    {
-        public City city { get; set; }
-        public string cod { get; set; }
-        public float message { get; set; }
-        public int cnt { get; set; }
-        public List[] list { get; set; }
-    }
-
-    public class City
-    {
-        public int id { get; set; }
-        public string name { get; set; }
-        public Coord coord { get; set; }
-        public string country { get; set; }
-        public int population { get; set; }
-        public int timezone { get; set; }
-    }
-
-    public class Coord
-    {
-        public float lon { get; set; }
-        public float lat { get; set; }
-    }
-
-    public class List
-    {
-        public int dt { get; set; }
-        public int sunrise { get; set; }
-        public int sunset { get; set; }
-        public Temp temp { get; set; }
-        public Feels_Like feels_like { get; set; }
-        public int pressure { get; set; }
-        public int humidity { get; set; }
-        public Weather[] weather { get; set; }
-        public float speed { get; set; }
-        public int deg { get; set; }
-        public int clouds { get; set; }
-        public int pop { get; set; }
-    }
-
-    public class Temp
-    {
-        public float day { get; set; }
-        public float min { get; set; }
-        public float max { get; set; }
-        public float night { get; set; }
-        public float eve { get; set; }
-        public float morn { get; set; }
-    }
-
-    public class Feels_Like
-    {
-        public float day { get; set; }
-        public float night { get; set; }
-        public float eve { get; set; }
-        public float morn { get; set; }
-    }
-
-    public class Weather
-    {
-        public int id { get; set; }
-        public string main { get; set; }
-        public string description { get; set; }
-        public string icon { get; set; }
-    }
-
-
     [Controller]
     [Route("api/[controller]")]
     public class DataController : Controller
@@ -89,7 +20,7 @@ namespace SSBackendApp.Controllers
         private readonly StringBuilder _weatherKey;
         private readonly StringBuilder _energyKey;
         private readonly DateTime _startTime = DateTime.Parse("2010-06-22");
-        private readonly DateTime _endTime = DateTime.Parse("2010-06-22").AddDays(3831);
+        private readonly DateTime _endTime = DateTime.Parse("2010-06-22").AddDays(7825);
 
         private DateTime _currentDate;
         private NumberFormatInfo numberFormatInfo;
@@ -107,192 +38,166 @@ namespace SSBackendApp.Controllers
 
         [HttpGet]
         [Route("[action]")]
-        public async Task<IActionResult> GetWeather([FromQuery] string startDate, string endDate, string step)
-        {
-            if (startDate is null || endDate is null)
-                return BadRequest(new { message = "Set startDate, endDate" });
-
-            var _startDate = DateTime.Parse(startDate);
-            var _endDate = DateTime.Parse(endDate);
-            var _step = step == "mounth" ? 30 : 1;
-
-            var timedelta = (_endDate - _startDate).Days;
-
-            var startIndex = (_startDate - _startTime).Days - 1;
-
-            var weatherGlobal = _features.Select(feature => double.Parse(feature.Weather, numberFormatInfo)).ToList<double>();
-            var weatherCollection = new List<double>();
-            var timeFrames = new List<string>();
-
-
-            var diff_after_now = (_endDate - DateTime.Now).Days; // now-->
-            var diff_before_now = (DateTime.Now - _startDate).Days; // <--now
-            var diff_sum = diff_after_now + diff_before_now;
-
-            for (int i = 0; i < diff_sum; i += _step)
+        public async Task<IActionResult> GetWeather([FromQuery] string startDate, string endDate, string step) =>
+            await Task.Factory.StartNew<IActionResult>(() =>
             {
-                _currentDate = _startDate.Add(TimeSpan.FromDays(i));
-                timeFrames.Add($"{_currentDate.Year}-{_currentDate.Month.ToString("00")}-{_currentDate.Day.ToString("00")}");
-            }
+                if (startDate is null || endDate is null)
+                    return BadRequest(new { message = "Set startDate, endDate" });
 
-            // if predict more than 7 days
-            if (_endDate > DateTime.Now && (_endDate - DateTime.Now).Days > 7)
-            {
-                int first7daysCounter = 0;
-                var weatherPredict = (await GetWeather()).list;
+                var _startDate = DateTime.Parse(startDate);
+                var _endDate = DateTime.Parse(endDate);
+                var _step = step == "mounth" ? 30 : 1;
 
-                for (int i = startIndex; i < startIndex + diff_before_now; i += _step)
+                var timedelta = (_endDate - _startDate).Days;
+
+                var startIndex = (_startDate - _startTime).Days - 1;
+
+                var weatherGlobal = _features.Select(feature => double.Parse(feature.Weather, numberFormatInfo)).ToList<double>();
+                var weatherCollection = new List<double>();
+                var timeFrames = new List<string>();
+
+
+                var diff_after_now = (_endDate - DateTime.Now).Days; // now-->
+                var diff_before_now = (DateTime.Now - _startDate).Days; // <--now
+                var diff_sum = diff_after_now + diff_before_now;
+
+                for (int i = 0; i < diff_sum; i += _step)
+                {
+                    _currentDate = _startDate.Add(TimeSpan.FromDays(i));
+                    timeFrames.Add($"{_currentDate.Year}-{_currentDate.Month.ToString("00")}-{_currentDate.Day.ToString("00")}");
+                }
+
+                // if predict more than 7 days
+                if (_endDate > DateTime.Now && (_endDate - DateTime.Now).Days > 7)
+                {
+                    int first7daysCounter = 0;
+                    var weatherPredict = (GetWeather().Result).list;
+
+                    for (int i = startIndex; i < startIndex + diff_before_now; i += _step)
+                    {
+                        weatherCollection.Add(weatherGlobal[i]);
+                    }
+                    for (int i = startIndex + diff_before_now; i < startIndex + diff_sum; i += _step)
+                    {
+                        if (first7daysCounter < 7)
+                        {
+                            weatherCollection.Add(weatherPredict[first7daysCounter].temp.day - 273);
+
+                            ++first7daysCounter;
+                            continue;
+                        }
+
+                        weatherCollection.Add(weatherGlobal[i]);
+                    }
+                }
+                // if less than 7 days
+                else if (_endDate > DateTime.Now && (_endDate - DateTime.Now).Days <= 7)
+                {
+                    var weatherPredict = (GetWeather().Result).list;
+
+                    var first7daysCounter = 0;
+
+                    // before now
+                    for (int i = startIndex; i < startIndex + diff_before_now; i += _step)
+                    {
+                        weatherCollection.Add(weatherGlobal[i]);
+                    }
+
+                    // after now but less than 7
+                    for (int i = startIndex + diff_before_now; i <= startIndex + diff_sum; i += _step)
+                    {
+                        if (first7daysCounter < diff_after_now)
+                        {
+                            weatherCollection.Add(weatherPredict[first7daysCounter].temp.day - 273);
+                            ++first7daysCounter;
+                        }
+                        else
+                        {
+                            return new JsonResult(new { x = timeFrames, y = weatherCollection });
+                        }
+                    }
+                }
+
+                for (int i = startIndex; i < startIndex + timedelta; i += _step)
                 {
                     weatherCollection.Add(weatherGlobal[i]);
                 }
-                for (int i = startIndex + diff_before_now; i < startIndex + diff_sum; i += _step)
-                {
-                    if (first7daysCounter < 7)
-                    {
-                        weatherCollection.Add(weatherPredict[first7daysCounter].temp.day - 273);
 
-                        ++first7daysCounter;
-                        continue;
-                    }
-
-                    weatherCollection.Add(weatherGlobal[i]);
-                }
-            }
-            // if less than 7 days
-            else if (_endDate > DateTime.Now && (_endDate - DateTime.Now).Days <= 7)
-            {
-                var weatherPredict = (await GetWeather()).list;
-
-                var first7daysCounter = 0;
-
-                // before now
-                for (int i = startIndex; i < startIndex + diff_before_now; i += _step)
-                {
-                    weatherCollection.Add(weatherGlobal[i]);
-                }
-
-                // after now but less than 7
-                for (int i = startIndex + diff_before_now; i <= startIndex + diff_sum; i += _step)
-                {
-                    if (first7daysCounter < diff_after_now)
-                    {
-                        weatherCollection.Add(weatherPredict[first7daysCounter].temp.day - 273);
-                        ++first7daysCounter;
-                    }
-                    else
-                    {
-                        return new JsonResult(new { x = timeFrames, y = weatherCollection });
-                    }
-                }
-            }
-
-            for (int i = startIndex; i < startIndex + timedelta; i += _step)
-            {
-                weatherCollection.Add(weatherGlobal[i]);
-            }
-
-            return new JsonResult(new { x = timeFrames, y = weatherCollection });
-        }
+                return new JsonResult(new { x = timeFrames, y = weatherCollection });
+            });
 
         [HttpGet]
         [Route("[action]")]
-        public async Task<IActionResult> GetCovid([FromQuery] string startDate, string endDate, string terr, string step)
-        {
-            if (startDate is null || endDate is null)
-                return BadRequest(new { message = "Set startDate, endDate" });
-
-            var _startDate = DateTime.Parse(startDate);
-            var _endDate = DateTime.Parse(endDate);
-            var _step = step == "mounth" ? 30 : 1;
-
-            var timedelta = (_endDate - _startDate).Days;
-
-            var startIndex = (_startDate - _startTime).Days - 1;
-
-            var covidGlobal = _features.Select(feature => double.Parse(feature.CovidCases, numberFormatInfo)).ToList<double>();
-            var covidCollection = new List<double>();
-            var timeFrames = new List<string>();
-
-
-            var diff_after_now = (_endDate - DateTime.Now).Days; // now-->
-            var diff_before_now = (DateTime.Now - _startDate).Days; // <--now
-            var diff_sum = diff_after_now + diff_before_now;
-
-            for (int i = 0; i < diff_sum; i += _step)
+        public async Task<IActionResult> GetCovid([FromQuery] string startDate, string endDate, string terr, string step) =>
+            await Task.Factory.StartNew<IActionResult>(() =>
             {
-                _currentDate = _startDate.Add(TimeSpan.FromDays(i));
-                timeFrames.Add($"{_currentDate.Year}-{_currentDate.Month.ToString("00")}-{_currentDate.Day.ToString("00")}");
-            }
+                if (startDate is null || endDate is null)
+                    return BadRequest(new { message = "Set startDate, endDate" });
 
-            if (_endDate > this._endTime)
-            {
-                for (int i = startIndex; i < startIndex + diff_before_now; i += _step)
+                var _startDate = DateTime.Parse(startDate);
+                var _endDate = DateTime.Parse(endDate);
+                var _step = step == "mounth" ? 30 : 1;
+
+                var timedelta = (_endDate - _startDate).Days;
+
+                var startIndex = (_startDate - _startTime).Days - 1;
+
+                var covidGlobal = _features.Select(feature => double.Parse(feature.CovidCases, numberFormatInfo)).ToList<double>();
+                var covidCollection = new List<double>();
+                var timeFrames = new List<string>();
+
+
+                var diff_after_now = (_endDate - DateTime.Now).Days; // now-->
+                var diff_before_now = (DateTime.Now - _startDate).Days; // <--now
+                var diff_sum = diff_after_now + diff_before_now;
+
+                for (int i = 0; i < diff_sum; i += _step)
                 {
+                    _currentDate = _startDate.Add(TimeSpan.FromDays(i));
+                    timeFrames.Add($"{_currentDate.Year}-{_currentDate.Month.ToString("00")}-{_currentDate.Day.ToString("00")}");
+                }
+
+                for (int i = startIndex; i < startIndex + diff_sum; i += _step)
                     covidCollection.Add(covidGlobal[i]);
-                }
-                for (int i = startIndex + diff_before_now; i < startIndex + diff_sum; i += _step)
-                {
-                    covidGlobal.Add(covidGlobal[i]);
-                }
+
                 return new JsonResult(new { x = timeFrames, y = covidCollection });
-            }
-
-            for (int i = startIndex; i < startIndex + diff_sum; i += _step)
-                covidCollection.Add(covidGlobal[i]);
-
-            return new JsonResult(new { x = timeFrames, y = covidCollection });
-        }
+            });
 
         [HttpGet]
         [Route("[action]")]
-        public async Task<IActionResult> GetDaylight([FromQuery] string startDate, string endDate, string terr, string step)
-        {
-            if (startDate is null || endDate is null)
-                return BadRequest(new { message = "Set startDate, endDate" });
-
-            var _startDate = DateTime.Parse(startDate);
-            var _endDate = DateTime.Parse(endDate);
-            var _step = step == "mounth" ? 30 : 1;
-
-            var timedelta = (_endDate - _startDate).Days;
-
-            var startIndex = (_startDate - _startTime).Days - 1;
-
-            var nightDurationGlobal = _features.Select(feature => double.Parse(feature.NightDuration, numberFormatInfo)).ToList<double>();
-            var nightDurationCollection = new List<double>();
-            var timeFrames = new List<string>();
-
-            var diff_after_now = (_endDate - DateTime.Now).Days; // now-->
-            var diff_before_now = (DateTime.Now - _startDate).Days; // <--now
-            var diff_sum = diff_after_now + diff_before_now;
-
-            for (int i = 0; i < diff_sum; i += _step)
+        public async Task<IActionResult> GetDaylight([FromQuery] string startDate, string endDate, string terr, string step) =>
+            await Task.Factory.StartNew<IActionResult>(() =>
             {
-                _currentDate = _startDate.Add(TimeSpan.FromDays(i));
-                timeFrames.Add($"{_currentDate.Year}-{_currentDate.Month.ToString("00")}-{_currentDate.Day.ToString("00")}");
-            }
+                if (startDate is null || endDate is null)
+                    return BadRequest(new { message = "Set startDate, endDate" });
 
-            // if endDate > _lastDate
-            if (_endDate > this._endTime)
-            {
-                for (int i = startIndex; i < startIndex + diff_before_now; i += _step)
+                var _startDate = DateTime.Parse(startDate);
+                var _endDate = DateTime.Parse(endDate);
+                var _step = step == "mounth" ? 30 : 1;
+
+                var timedelta = (_endDate - _startDate).Days;
+
+                var startIndex = (_startDate - _startTime).Days - 1;
+
+                var nightDurationGlobal = _features.Select(feature => double.Parse(feature.NightDuration, numberFormatInfo)).ToList<double>();
+                var nightDurationCollection = new List<double>();
+                var timeFrames = new List<string>();
+
+                var diff_after_now = (_endDate - DateTime.Now).Days; // now-->
+                var diff_before_now = (DateTime.Now - _startDate).Days; // <--now
+                var diff_sum = diff_after_now + diff_before_now;
+
+                for (int i = 0; i < diff_sum; i += _step)
                 {
-                    nightDurationCollection.Add(nightDurationGlobal[i]);
+                    _currentDate = _startDate.Add(TimeSpan.FromDays(i));
+                    timeFrames.Add($"{_currentDate.Year}-{_currentDate.Month.ToString("00")}-{_currentDate.Day.ToString("00")}");
                 }
-                for (int i = startIndex + diff_before_now; i < startIndex + diff_sum; i += _step)
-                {
+
+                for (int i = startIndex; i < startIndex + diff_sum; i += _step)
                     nightDurationCollection.Add(nightDurationGlobal[i]);
-                }
-                return new JsonResult(new { x = timeFrames, y = nightDurationGlobal });
-            }
 
-            for (int i = startIndex; i < startIndex + diff_sum; i += _step)
-            {
-                nightDurationCollection.Add(nightDurationGlobal[i]);
-            }
-
-            return new JsonResult(new { x = timeFrames, y = nightDurationCollection });
-        }
+                return new JsonResult(new { x = timeFrames, y = nightDurationCollection });
+            });
 
         [HttpGet]
         [Route("[action]")]
