@@ -20,7 +20,6 @@ namespace SSBackendApp.Controllers
         private readonly StringBuilder _weatherKey;
         private readonly StringBuilder _energyKey;
         private readonly DateTime _startTime = DateTime.Parse("2010-06-22");
-        private readonly DateTime _endTime = DateTime.Parse("2010-06-22").AddDays(7825);
 
         private DateTime _currentDate;
         private NumberFormatInfo numberFormatInfo;
