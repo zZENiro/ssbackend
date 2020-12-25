@@ -70,7 +70,7 @@ namespace SSBackendApp.Controllers
                 if (_endDate > DateTime.Now && (_endDate - DateTime.Now).Days > 7)
                 {
                     int first7daysCounter = 0;
-                    var weatherPredict = (GetWeather().Result).list;
+                    var weatherPredict = GetWeather().list;
 
                     for (int i = startIndex; i < startIndex + diff_before_now; i += _step)
                     {
@@ -80,7 +80,7 @@ namespace SSBackendApp.Controllers
                     {
                         if (first7daysCounter < 7)
                         {
-                            weatherCollection.Add(weatherPredict[first7daysCounter].temp.day - 273);
+                            weatherCollection.Add(weatherPredict[first7daysCounter].temp.day.Value - 273);
 
                             ++first7daysCounter;
                             continue;
@@ -92,7 +92,7 @@ namespace SSBackendApp.Controllers
                 // if less than 7 days
                 else if (_endDate > DateTime.Now && (_endDate - DateTime.Now).Days <= 7)
                 {
-                    var weatherPredict = (GetWeather().Result).list;
+                    var weatherPredict = GetWeather().list;
 
                     var first7daysCounter = 0;
 
@@ -107,7 +107,7 @@ namespace SSBackendApp.Controllers
                     {
                         if (first7daysCounter < diff_after_now)
                         {
-                            weatherCollection.Add(weatherPredict[first7daysCounter].temp.day - 273);
+                            weatherCollection.Add(weatherPredict[first7daysCounter].temp.day.Value - 273);
                             ++first7daysCounter;
                         }
                         else
@@ -232,7 +232,7 @@ namespace SSBackendApp.Controllers
                 // if predict more than 7 days
                 if (_endDate > DateTime.Now && (_endDate - DateTime.Now).Days > 7)
                 {
-                    var weatherPredict = (GetWeather().Result).list;
+                    var weatherPredict = GetWeather().list;
 
                     var first7daysCounter = 0;
 
@@ -263,7 +263,7 @@ namespace SSBackendApp.Controllers
                         {
                             prediction.Add(
                                    (night[i] * PredictionModelConfiguration.NightDurationWeight) +
-                                   ((weatherPredict[first7daysCounter].temp.day - 273) * PredictionModelConfiguration.WeatherWeight) +
+                                   ((weatherPredict[first7daysCounter].temp.day.Value - 273) * PredictionModelConfiguration.WeatherWeight) +
                                    (newYear[i] * PredictionModelConfiguration.NewYearWeight) +
                                    (holiday[i] * PredictionModelConfiguration.HolidayWeight) +
                                    (sunday[i] * PredictionModelConfiguration.SundayWeight) +
@@ -295,7 +295,7 @@ namespace SSBackendApp.Controllers
                 // if less than 7 days
                 else if (_endDate > DateTime.Now && (_endDate - DateTime.Now).Days <= 7)
                 {
-                    var weatherPredict = (GetWeather().Result).list;
+                    var weatherPredict = GetWeather().list;
 
                     var first7daysCounter = 0;
 
@@ -328,7 +328,7 @@ namespace SSBackendApp.Controllers
                         {
                             prediction.Add(
                                    (night[i] * PredictionModelConfiguration.NightDurationWeight) +
-                                   ((weatherPredict[first7daysCounter].temp.day - 273) * PredictionModelConfiguration.WeatherWeight) +
+                                   ((weatherPredict[first7daysCounter].temp.day.Value - 273) * PredictionModelConfiguration.WeatherWeight) +
                                    (newYear[i] * PredictionModelConfiguration.NewYearWeight) +
                                    (holiday[i] * PredictionModelConfiguration.HolidayWeight) +
                                    (sunday[i] * PredictionModelConfiguration.SundayWeight) +
@@ -367,7 +367,7 @@ namespace SSBackendApp.Controllers
 
         }
 
-        async Task<Rootobject> GetWeather()
+        Rootobject GetWeather()
         {
             var client = new HttpClient();
             var request = new HttpRequestMessage
@@ -380,10 +380,11 @@ namespace SSBackendApp.Controllers
                     { "x-rapidapi-host", "community-open-weather-map.p.rapidapi.com" },
                 },
             };
-            using (var response = await client.SendAsync(request))
+            using (var response = client.SendAsync(request).Result)
             {
                 response.EnsureSuccessStatusCode();
-                var body = await response.Content.ReadAsStringAsync();
+                var body = response.Content.ReadAsStringAsync().Result;
+
                 return JsonSerializer.Deserialize<Rootobject>(body);
             }
         }

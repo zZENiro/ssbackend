@@ -2,7 +2,7 @@
 
 services:
   webapp:
-    image: zen1488/ssb
+    image: zen1488/kursach
     environment:
       DATA_CSV: ./DatasetLong.csv
 

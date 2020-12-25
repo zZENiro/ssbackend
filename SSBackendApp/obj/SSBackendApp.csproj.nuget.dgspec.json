@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\zZEN\\source\\repos\\SSBackend\\SSBackendApp\\SSBackendApp.csproj": {}
+    "C:\\Users\\zZEN\\Desktop\\SSBackend\\SSBackendApp\\SSBackendApp.csproj": {}
   },
   "projects": {
-    "C:\\Users\\zZEN\\source\\repos\\SSBackend\\SSBackendApp\\SSBackendApp.csproj": {
+    "C:\\Users\\zZEN\\Desktop\\SSBackend\\SSBackendApp\\SSBackendApp.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\zZEN\\source\\repos\\SSBackend\\SSBackendApp\\SSBackendApp.csproj",
+        "projectUniqueName": "C:\\Users\\zZEN\\Desktop\\SSBackend\\SSBackendApp\\SSBackendApp.csproj",
         "projectName": "SSBackendApp",
-        "projectPath": "C:\\Users\\zZEN\\source\\repos\\SSBackend\\SSBackendApp\\SSBackendApp.csproj",
+        "projectPath": "C:\\Users\\zZEN\\Desktop\\SSBackend\\SSBackendApp\\SSBackendApp.csproj",
         "packagesPath": "C:\\Users\\zZEN\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\zZEN\\source\\repos\\SSBackend\\SSBackendApp\\obj\\",
+        "outputPath": "C:\\Users\\zZEN\\Desktop\\SSBackend\\SSBackendApp\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\zZEN\\AppData\\Roaming\\NuGet\\NuGet.Config",

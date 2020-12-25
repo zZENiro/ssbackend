@@ -2,10 +2,10 @@
 {
     public class Feels_Like
     {
-        public float day { get; set; }
-        public float night { get; set; }
-        public float eve { get; set; }
-        public float morn { get; set; }
+        public float? day { get; set; }
+        public float? night { get; set; }
+        public float? eve { get; set; }
+        public float? morn { get; set; }
     }
 }
 
