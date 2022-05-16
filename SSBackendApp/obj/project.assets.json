@@ -2069,19 +2069,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\zZEN\\.nuget\\packages\\": {}
+    "C:\\Users\\soloi\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\zZEN\\Desktop\\SSBackend\\SSBackendApp\\SSBackendApp.csproj",
+      "projectUniqueName": "C:\\Users\\soloi\\OneDrive\\Рабочий стол\\ssbackend\\SSBackendApp\\SSBackendApp.csproj",
       "projectName": "SSBackendApp",
-      "projectPath": "C:\\Users\\zZEN\\Desktop\\SSBackend\\SSBackendApp\\SSBackendApp.csproj",
-      "packagesPath": "C:\\Users\\zZEN\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\zZEN\\Desktop\\SSBackend\\SSBackendApp\\obj\\",
+      "projectPath": "C:\\Users\\soloi\\OneDrive\\Рабочий стол\\ssbackend\\SSBackendApp\\SSBackendApp.csproj",
+      "packagesPath": "C:\\Users\\soloi\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\soloi\\OneDrive\\Рабочий стол\\ssbackend\\SSBackendApp\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\zZEN\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\soloi\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -2134,6 +2134,24 @@
         ],
         "assetTargetFallback": true,
         "warn": true,
+        "downloadDependencies": [
+          {
+            "name": "Microsoft.AspNetCore.App.Ref",
+            "version": "[3.1.10, 3.1.10]"
+          },
+          {
+            "name": "Microsoft.NETCore.App.Host.win-x64",
+            "version": "[3.1.21, 3.1.21]"
+          },
+          {
+            "name": "Microsoft.NETCore.App.Ref",
+            "version": "[3.1.0, 3.1.0]"
+          },
+          {
+            "name": "Microsoft.WindowsDesktop.App.Ref",
+            "version": "[3.1.0, 3.1.0]"
+          }
+        ],
         "frameworkReferences": {
           "Microsoft.AspNetCore.App": {
             "privateAssets": "none"
@@ -2142,7 +2160,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.100\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Users\\soloi\\.dotnet\\sdk\\6.0.100\\RuntimeIdentifierGraph.json"
       }
     }
   }
